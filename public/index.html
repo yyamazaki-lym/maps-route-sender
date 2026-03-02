@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Maps Route Sender</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Maps Route Sender</h1>
+    <p class="subtitle">経路を検索してスマホに送信</p>
+
+    <!-- 経路入力セクション -->
+    <section class="card">
+      <h2>経路検索</h2>
+      <div class="form-group">
+        <label for="origin">出発地</label>
+        <input type="text" id="origin" placeholder="例: 東京駅">
+      </div>
+      <div class="form-group">
+        <label for="destination">目的地</label>
+        <input type="text" id="destination" placeholder="例: 渋谷駅">
+      </div>
+      <div class="form-group">
+        <label>移動手段</label>
+        <div class="travel-modes">
+          <label class="mode-option">
+            <input type="radio" name="travelMode" value="transit" checked>
+            <span>🚃 電車</span>
+          </label>
+          <label class="mode-option">
+            <input type="radio" name="travelMode" value="driving">
+            <span>🚗 車</span>
+          </label>
+          <label class="mode-option">
+            <input type="radio" name="travelMode" value="walking">
+            <span>🚶 徒歩</span>
+          </label>
+          <label class="mode-option">
+            <input type="radio" name="travelMode" value="bicycling">
+            <span>🚲 自転車</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button id="sendBtn" class="btn primary" disabled>スマホに送信</button>
+        <button id="openBtn" class="btn secondary">このブラウザで開く</button>
+      </div>
+
+      <div id="sendStatus" class="status" hidden></div>
+    </section>
+
+    <!-- デバイス登録セクション -->
+    <section class="card">
+      <h2>デバイス登録</h2>
+      <p class="hint">スマホでこのページを開いて通知を許可すると、PCから経路を送信できます。</p>
+
+      <div class="form-group">
+        <label for="deviceName">デバイス名</label>
+        <input type="text" id="deviceName" placeholder="例: 自分のスマホ">
+      </div>
+
+      <button id="subscribeBtn" class="btn primary">このデバイスで通知を受け取る</button>
+      <div id="subscribeStatus" class="status" hidden></div>
+
+      <div id="deviceList" class="device-list" hidden>
+        <h3>登録済みデバイス</h3>
+        <ul id="devices"></ul>
+      </div>
+    </section>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,22 @@
+{
+  "name": "maps-route-sender",
+  "version": "1.0.0",
+  "description": "Google Maps経路検索結果をWeb Push通知でスマホに送信するツール",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "generate-vapid": "node -e \"const w=require('web-push');const k=w.generateVAPIDKeys();console.log('VAPID_PUBLIC_KEY='+k.publicKey);console.log('VAPID_PRIVATE_KEY='+k.privateKey)\""
+  },
+  "keywords": [
+    "google-maps",
+    "web-push",
+    "route"
+  ],
+  "license": "MIT",
+  "type": "commonjs",
+  "dependencies": {
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "web-push": "^3.6.7"
+  }
+}
