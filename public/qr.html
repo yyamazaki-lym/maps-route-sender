@@ -94,6 +94,11 @@
         <br>
         <a id="mapsLink" class="maps-link" href="#" target="_blank" rel="noopener"></a>
       </div>
+
+      <div id="mapArea" class="map-area" hidden>
+        <h3>経路プレビュー</h3>
+        <iframe id="mapFrame" src="" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+      </div>
     </section>
 
     <div class="nav-link">
@@ -115,6 +120,8 @@
     const qrArea = document.getElementById("qrArea");
     const qrCanvas = document.getElementById("qrCanvas");
     const mapsLink = document.getElementById("mapsLink");
+    const mapArea = document.getElementById("mapArea");
+    const mapFrame = document.getElementById("mapFrame");
 
     // 時・分のプルダウンを生成
     for (let h = 0; h < 24; h++) {
@@ -210,6 +217,22 @@
       return label;
     }
 
+    // iframe埋め込み用URLを生成
+    function buildEmbedUrl() {
+      const origin = originInput.value.trim();
+      const destination = destInput.value.trim();
+      const travelMode = document.querySelector('input[name="travelMode"]:checked').value;
+      if (!origin || !destination) return null;
+      const dirflg = { transit: "r", driving: "d", walking: "w", bicycling: "b" }[travelMode] || "r";
+      return (
+        `https://www.google.com/maps?` +
+        `saddr=${encodeURIComponent(origin)}` +
+        `&daddr=${encodeURIComponent(destination)}` +
+        `&dirflg=${dirflg}` +
+        `&output=embed`
+      );
+    }
+
     generateBtn.addEventListener("click", () => {
       const url = buildMapsUrl();
       if (!url) return;
@@ -223,6 +246,13 @@
       mapsLink.href = url;
       mapsLink.textContent = buildLabel();
       qrArea.hidden = false;
+
+      // 地図プレビューを表示
+      const embedUrl = buildEmbedUrl();
+      if (embedUrl) {
+        mapFrame.src = embedUrl;
+        mapArea.hidden = false;
+      }
     });
 
     openBtn.addEventListener("click", () => {

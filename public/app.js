@@ -13,6 +13,8 @@ const subscribeStatus = document.getElementById("subscribeStatus");
 const deviceNameInput = document.getElementById("deviceName");
 const deviceListSection = document.getElementById("deviceList");
 const devicesUl = document.getElementById("devices");
+const mapArea = document.getElementById("mapArea");
+const mapFrame = document.getElementById("mapFrame");
 
 // 時・分のプルダウンを生成
 for (let h = 0; h < 24; h++) {
@@ -91,6 +93,31 @@ function buildMapsUrl() {
     `&destination=${encodeURIComponent(destination)}` +
     `&travelmode=${travelMode}`
   );
+}
+
+// iframe埋め込み用URLを生成
+function buildEmbedUrl() {
+  const origin = originInput.value.trim();
+  const destination = destInput.value.trim();
+  const travelMode = document.querySelector('input[name="travelMode"]:checked').value;
+  if (!origin || !destination) return null;
+  const dirflg = { transit: "r", driving: "d", walking: "w", bicycling: "b" }[travelMode] || "r";
+  return (
+    `https://www.google.com/maps?` +
+    `saddr=${encodeURIComponent(origin)}` +
+    `&daddr=${encodeURIComponent(destination)}` +
+    `&dirflg=${dirflg}` +
+    `&output=embed`
+  );
+}
+
+// 地図プレビューを表示
+function showMapPreview() {
+  const embedUrl = buildEmbedUrl();
+  if (embedUrl) {
+    mapFrame.src = embedUrl;
+    mapArea.hidden = false;
+  }
 }
 
 // このブラウザで開くボタン
@@ -193,6 +220,7 @@ sendBtn.addEventListener("click", async () => {
     if (res.ok) {
       const sent = data.results.filter((r) => r.status === "sent").length;
       showStatus(sendStatus, `${sent}台のデバイスに送信しました`, "success");
+      showMapPreview();
     } else {
       showStatus(sendStatus, data.error || "送信に失敗しました", "error");
     }
