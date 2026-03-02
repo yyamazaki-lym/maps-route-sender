@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Maps Route Sender - QR</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .qr-area {
+      margin-top: 1.5rem;
+      text-align: center;
+    }
+    .qr-area canvas {
+      border-radius: 12px;
+      background: #fff;
+      padding: 12px;
+    }
+    .maps-link {
+      display: inline-block;
+      margin-top: 0.8rem;
+      color: #4ecdc4;
+      font-size: 0.85rem;
+      word-break: break-all;
+    }
+    .nav-link {
+      text-align: center;
+      margin-top: 1.5rem;
+    }
+    .nav-link a {
+      color: #666;
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Maps Route Sender</h1>
+    <p class="subtitle">経路をQRコードでスマホに送信</p>
+
+    <section class="card">
+      <h2>経路検索</h2>
+      <div class="form-group">
+        <label for="origin">出発地</label>
+        <input type="text" id="origin" placeholder="例: 東京駅">
+      </div>
+      <div class="form-group">
+        <label for="destination">目的地</label>
+        <input type="text" id="destination" placeholder="例: 渋谷駅">
+      </div>
+      <div class="form-group">
+        <label>移動手段</label>
+        <div class="travel-modes">
+          <label class="mode-option">
+            <input type="radio" name="travelMode" value="transit" checked>
+            <span>🚃 電車</span>
+          </label>
+          <label class="mode-option">
+            <input type="radio" name="travelMode" value="driving">
+            <span>🚗 車</span>
+          </label>
+          <label class="mode-option">
+            <input type="radio" name="travelMode" value="walking">
+            <span>🚶 徒歩</span>
+          </label>
+          <label class="mode-option">
+            <input type="radio" name="travelMode" value="bicycling">
+            <span>🚲 自転車</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button id="generateBtn" class="btn primary">QRコード生成</button>
+        <button id="openBtn" class="btn secondary">このブラウザで開く</button>
+      </div>
+
+      <div id="qrArea" class="qr-area" hidden>
+        <canvas id="qrCanvas"></canvas>
+        <br>
+        <a id="mapsLink" class="maps-link" href="#" target="_blank" rel="noopener"></a>
+      </div>
+    </section>
+
+    <div class="nav-link">
+      <a href="index.html">Push通知版はこちら（サーバー必要）</a>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script>
+  <script>
+    const originInput = document.getElementById("origin");
+    const destInput = document.getElementById("destination");
+    const generateBtn = document.getElementById("generateBtn");
+    const openBtn = document.getElementById("openBtn");
+    const qrArea = document.getElementById("qrArea");
+    const qrCanvas = document.getElementById("qrCanvas");
+    const mapsLink = document.getElementById("mapsLink");
+
+    function buildMapsUrl() {
+      const origin = originInput.value.trim();
+      const destination = destInput.value.trim();
+      const travelMode = document.querySelector('input[name="travelMode"]:checked').value;
+      if (!origin || !destination) return null;
+      return (
+        `https://www.google.com/maps/dir/?api=1` +
+        `&origin=${encodeURIComponent(origin)}` +
+        `&destination=${encodeURIComponent(destination)}` +
+        `&travelmode=${travelMode}`
+      );
+    }
+
+    generateBtn.addEventListener("click", () => {
+      const url = buildMapsUrl();
+      if (!url) return;
+
+      QRCode.toCanvas(qrCanvas, url, {
+        width: 280,
+        margin: 1,
+        color: { dark: "#000000", light: "#ffffff" },
+      });
+
+      mapsLink.href = url;
+      mapsLink.textContent = `${originInput.value.trim()} → ${destInput.value.trim()}`;
+      qrArea.hidden = false;
+    });
+
+    openBtn.addEventListener("click", () => {
+      const url = buildMapsUrl();
+      if (url) window.open(url, "_blank");
+    });
+
+    // Enter キーでQR生成
+    document.querySelectorAll("input[type=text]").forEach((el) => {
+      el.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") generateBtn.click();
+      });
+    });
+  </script>
+</body>
+</html>
