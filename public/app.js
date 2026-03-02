@@ -1,6 +1,9 @@
 const originInput = document.getElementById("origin");
 const destInput = document.getElementById("destination");
-const datetimeInput = document.getElementById("datetime");
+const dateInput = document.getElementById("dateInput");
+const hourSelect = document.getElementById("hourSelect");
+const minuteSelect = document.getElementById("minuteSelect");
+const datetimeSelects = document.getElementById("datetimeSelects");
 const timeTypeRadios = document.querySelectorAll('input[name="timeType"]');
 const sendBtn = document.getElementById("sendBtn");
 const openBtn = document.getElementById("openBtn");
@@ -11,18 +14,43 @@ const deviceNameInput = document.getElementById("deviceName");
 const deviceListSection = document.getElementById("deviceList");
 const devicesUl = document.getElementById("devices");
 
-// 「今すぐ」以外を選んだら日時入力を有効化
+// 時・分のプルダウンを生成
+for (let h = 0; h < 24; h++) {
+  const opt = document.createElement("option");
+  opt.value = h;
+  opt.textContent = String(h).padStart(2, "0");
+  hourSelect.appendChild(opt);
+}
+for (let m = 0; m < 60; m += 5) {
+  const opt = document.createElement("option");
+  opt.value = m;
+  opt.textContent = String(m).padStart(2, "0");
+  minuteSelect.appendChild(opt);
+}
+
+// 「今すぐ」以外を選んだらプルダウンを表示
 timeTypeRadios.forEach((r) => {
   r.addEventListener("change", () => {
     const isNow = document.querySelector('input[name="timeType"]:checked').value === "now";
-    datetimeInput.disabled = isNow;
-    if (!isNow && !datetimeInput.value) {
+    datetimeSelects.style.display = isNow ? "none" : "flex";
+    if (!isNow && !dateInput.value) {
       const now = new Date();
-      now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-      datetimeInput.value = now.toISOString().slice(0, 16);
+      dateInput.value = now.toISOString().slice(0, 10);
+      hourSelect.value = now.getHours();
+      minuteSelect.value = Math.round(now.getMinutes() / 5) * 5 % 60;
     }
   });
 });
+
+// 選択された日時をDateオブジェクトで取得
+function getSelectedDatetime() {
+  if (!dateInput.value) return null;
+  return new Date(
+    dateInput.value + "T" +
+    String(hourSelect.value).padStart(2, "0") + ":" +
+    String(minuteSelect.value).padStart(2, "0")
+  );
+}
 
 // Google Maps経路URLを生成（日時対応）
 function buildMapsUrl() {
@@ -32,27 +60,29 @@ function buildMapsUrl() {
   const timeType = document.querySelector('input[name="timeType"]:checked').value;
   if (!origin || !destination) return null;
 
-  if (timeType !== "now" && datetimeInput.value) {
-    const dt = new Date(datetimeInput.value);
-    const dirflg = { transit: "r", driving: "d", walking: "w", bicycling: "b" }[travelMode] || "r";
-    const mm = String(dt.getMonth() + 1).padStart(2, "0");
-    const dd = String(dt.getDate()).padStart(2, "0");
-    const yyyy = dt.getFullYear();
-    const hours = dt.getHours();
-    const minutes = String(dt.getMinutes()).padStart(2, "0");
-    const ampm = hours >= 12 ? "pm" : "am";
-    const h12 = hours % 12 || 12;
-    const ttype = timeType === "arrive" ? "arr" : "dep";
+  if (timeType !== "now") {
+    const dt = getSelectedDatetime();
+    if (dt) {
+      const dirflg = { transit: "r", driving: "d", walking: "w", bicycling: "b" }[travelMode] || "r";
+      const mm = String(dt.getMonth() + 1).padStart(2, "0");
+      const dd = String(dt.getDate()).padStart(2, "0");
+      const yyyy = dt.getFullYear();
+      const hours = dt.getHours();
+      const minutes = String(dt.getMinutes()).padStart(2, "0");
+      const ampm = hours >= 12 ? "pm" : "am";
+      const h12 = hours % 12 || 12;
+      const ttype = timeType === "arrive" ? "arr" : "dep";
 
-    return (
-      `https://www.google.com/maps?` +
-      `saddr=${encodeURIComponent(origin)}` +
-      `&daddr=${encodeURIComponent(destination)}` +
-      `&dirflg=${dirflg}` +
-      `&ttype=${ttype}` +
-      `&date=${mm}/${dd}/${yyyy}` +
-      `&time=${h12}:${minutes}${ampm}`
-    );
+      return (
+        `https://www.google.com/maps?` +
+        `saddr=${encodeURIComponent(origin)}` +
+        `&daddr=${encodeURIComponent(destination)}` +
+        `&dirflg=${dirflg}` +
+        `&ttype=${ttype}` +
+        `&date=${mm}/${dd}/${yyyy}` +
+        `&time=${h12}:${minutes}${ampm}`
+      );
+    }
   }
 
   return (

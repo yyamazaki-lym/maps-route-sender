@@ -55,8 +55,8 @@ h1 {
 }
 
 input[type="text"],
-input[type="datetime-local"] {
-  width: 100%;
+input[type="date"],
+select {
   padding: 0.7rem;
   border: 1px solid #333;
   border-radius: 8px;
@@ -65,14 +65,40 @@ input[type="datetime-local"] {
   font-size: 1rem;
 }
 
+input[type="text"] {
+  width: 100%;
+}
+
 input[type="text"]:focus,
-input[type="datetime-local"]:focus {
+input[type="date"]:focus,
+select:focus {
   outline: none;
   border-color: #4ecdc4;
 }
 
-input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+input[type="date"]::-webkit-calendar-picker-indicator {
   filter: invert(0.7);
+}
+
+.datetime-selects {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.datetime-selects input[type="date"] {
+  flex: 1;
+  min-width: 140px;
+}
+
+.datetime-selects select {
+  width: 70px;
+}
+
+.datetime-selects .separator {
+  color: #666;
+  font-size: 1rem;
 }
 
 .time-type-options {

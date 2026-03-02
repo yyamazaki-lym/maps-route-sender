@@ -51,7 +51,12 @@
           <label><input type="radio" name="timeType" value="depart"> <span>出発時刻</span></label>
           <label><input type="radio" name="timeType" value="arrive"> <span>到着時刻</span></label>
         </div>
-        <input type="datetime-local" id="datetime" disabled>
+        <div class="datetime-selects" id="datetimeSelects" style="display:none">
+          <input type="date" id="dateInput">
+          <select id="hourSelect"></select>
+          <span class="separator">:</span>
+          <select id="minuteSelect"></select>
+        </div>
       </div>
 
       <div class="actions">
