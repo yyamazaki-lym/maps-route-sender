@@ -33,7 +33,7 @@
   </style>
 </head>
 <body>
-  <div class="container">
+  <div class="container wide">
     <h1>Maps Route Sender</h1>
     <p class="subtitle">経路をQRコードでスマホに送信</p>
 
@@ -89,15 +89,17 @@
         <button id="openBtn" class="btn secondary">このブラウザで開く</button>
       </div>
 
-      <div id="qrArea" class="qr-area" hidden>
-        <canvas id="qrCanvas"></canvas>
-        <br>
-        <a id="mapsLink" class="maps-link" href="#" target="_blank" rel="noopener"></a>
-      </div>
+      <div id="resultRow" class="result-row" hidden>
+        <div id="qrArea" class="qr-area">
+          <canvas id="qrCanvas"></canvas>
+          <br>
+          <a id="mapsLink" class="maps-link" href="#" target="_blank" rel="noopener"></a>
+        </div>
 
-      <div id="mapArea" class="map-area" hidden>
-        <h3>経路プレビュー</h3>
-        <iframe id="mapFrame" src="" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        <div id="mapArea" class="map-area">
+          <h3>経路プレビュー</h3>
+          <iframe id="mapFrame" src="" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        </div>
       </div>
     </section>
 
@@ -117,10 +119,9 @@
     const timeTypeRadios = document.querySelectorAll('input[name="timeType"]');
     const generateBtn = document.getElementById("generateBtn");
     const openBtn = document.getElementById("openBtn");
-    const qrArea = document.getElementById("qrArea");
+    const resultRow = document.getElementById("resultRow");
     const qrCanvas = document.getElementById("qrCanvas");
     const mapsLink = document.getElementById("mapsLink");
-    const mapArea = document.getElementById("mapArea");
     const mapFrame = document.getElementById("mapFrame");
 
     // 時・分のプルダウンを生成
@@ -245,14 +246,13 @@
 
       mapsLink.href = url;
       mapsLink.textContent = buildLabel();
-      qrArea.hidden = false;
 
       // 地図プレビューを表示
       const embedUrl = buildEmbedUrl();
       if (embedUrl) {
         mapFrame.src = embedUrl;
-        mapArea.hidden = false;
       }
+      resultRow.hidden = false;
     });
 
     openBtn.addEventListener("click", () => {
