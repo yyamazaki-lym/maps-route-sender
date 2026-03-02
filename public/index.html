@@ -44,6 +44,16 @@
         </div>
       </div>
 
+      <div class="form-group">
+        <label>日時指定（任意）</label>
+        <div class="time-type-options">
+          <label><input type="radio" name="timeType" value="now" checked> <span>今すぐ</span></label>
+          <label><input type="radio" name="timeType" value="depart"> <span>出発時刻</span></label>
+          <label><input type="radio" name="timeType" value="arrive"> <span>到着時刻</span></label>
+        </div>
+        <input type="datetime-local" id="datetime" disabled>
+      </div>
+
       <div class="actions">
         <button id="sendBtn" class="btn primary" disabled>スマホに送信</button>
         <button id="openBtn" class="btn secondary">このブラウザで開く</button>

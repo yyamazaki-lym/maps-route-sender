@@ -54,7 +54,8 @@ h1 {
   margin-bottom: 0.3rem;
 }
 
-input[type="text"] {
+input[type="text"],
+input[type="datetime-local"] {
   width: 100%;
   padding: 0.7rem;
   border: 1px solid #333;
@@ -64,9 +65,33 @@ input[type="text"] {
   font-size: 1rem;
 }
 
-input[type="text"]:focus {
+input[type="text"]:focus,
+input[type="datetime-local"]:focus {
   outline: none;
   border-color: #4ecdc4;
+}
+
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.7);
+}
+
+.time-type-options {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.time-type-options label {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.85rem;
+  color: #aaa;
+}
+
+.time-type-options input:checked + span {
+  color: #4ecdc4;
 }
 
 .travel-modes {

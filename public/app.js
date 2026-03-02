@@ -1,5 +1,7 @@
 const originInput = document.getElementById("origin");
 const destInput = document.getElementById("destination");
+const datetimeInput = document.getElementById("datetime");
+const timeTypeRadios = document.querySelectorAll('input[name="timeType"]');
 const sendBtn = document.getElementById("sendBtn");
 const openBtn = document.getElementById("openBtn");
 const sendStatus = document.getElementById("sendStatus");
@@ -9,12 +11,50 @@ const deviceNameInput = document.getElementById("deviceName");
 const deviceListSection = document.getElementById("deviceList");
 const devicesUl = document.getElementById("devices");
 
-// Google Maps経路URLを生成
+// 「今すぐ」以外を選んだら日時入力を有効化
+timeTypeRadios.forEach((r) => {
+  r.addEventListener("change", () => {
+    const isNow = document.querySelector('input[name="timeType"]:checked').value === "now";
+    datetimeInput.disabled = isNow;
+    if (!isNow && !datetimeInput.value) {
+      const now = new Date();
+      now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+      datetimeInput.value = now.toISOString().slice(0, 16);
+    }
+  });
+});
+
+// Google Maps経路URLを生成（日時対応）
 function buildMapsUrl() {
   const origin = originInput.value.trim();
   const destination = destInput.value.trim();
   const travelMode = document.querySelector('input[name="travelMode"]:checked').value;
+  const timeType = document.querySelector('input[name="timeType"]:checked').value;
   if (!origin || !destination) return null;
+
+  if (timeType !== "now" && datetimeInput.value) {
+    const dt = new Date(datetimeInput.value);
+    const dirflg = { transit: "r", driving: "d", walking: "w", bicycling: "b" }[travelMode] || "r";
+    const mm = String(dt.getMonth() + 1).padStart(2, "0");
+    const dd = String(dt.getDate()).padStart(2, "0");
+    const yyyy = dt.getFullYear();
+    const hours = dt.getHours();
+    const minutes = String(dt.getMinutes()).padStart(2, "0");
+    const ampm = hours >= 12 ? "pm" : "am";
+    const h12 = hours % 12 || 12;
+    const ttype = timeType === "arrive" ? "arr" : "dep";
+
+    return (
+      `https://www.google.com/maps?` +
+      `saddr=${encodeURIComponent(origin)}` +
+      `&daddr=${encodeURIComponent(destination)}` +
+      `&dirflg=${dirflg}` +
+      `&ttype=${ttype}` +
+      `&date=${mm}/${dd}/${yyyy}` +
+      `&time=${h12}:${minutes}${ampm}`
+    );
+  }
+
   return (
     `https://www.google.com/maps/dir/?api=1` +
     `&origin=${encodeURIComponent(origin)}` +

@@ -69,6 +69,16 @@
         </div>
       </div>
 
+      <div class="form-group">
+        <label>日時指定（任意）</label>
+        <div class="time-type-options">
+          <label><input type="radio" name="timeType" value="now" checked> <span>今すぐ</span></label>
+          <label><input type="radio" name="timeType" value="depart"> <span>出発時刻</span></label>
+          <label><input type="radio" name="timeType" value="arrive"> <span>到着時刻</span></label>
+        </div>
+        <input type="datetime-local" id="datetime" disabled>
+      </div>
+
       <div class="actions">
         <button id="generateBtn" class="btn primary">QRコード生成</button>
         <button id="openBtn" class="btn secondary">このブラウザで開く</button>
@@ -90,23 +100,79 @@
   <script>
     const originInput = document.getElementById("origin");
     const destInput = document.getElementById("destination");
+    const datetimeInput = document.getElementById("datetime");
+    const timeTypeRadios = document.querySelectorAll('input[name="timeType"]');
     const generateBtn = document.getElementById("generateBtn");
     const openBtn = document.getElementById("openBtn");
     const qrArea = document.getElementById("qrArea");
     const qrCanvas = document.getElementById("qrCanvas");
     const mapsLink = document.getElementById("mapsLink");
 
+    // 「今すぐ」以外を選んだら日時入力を有効化
+    timeTypeRadios.forEach((r) => {
+      r.addEventListener("change", () => {
+        const isNow = document.querySelector('input[name="timeType"]:checked').value === "now";
+        datetimeInput.disabled = isNow;
+        if (!isNow && !datetimeInput.value) {
+          // デフォルトで現在時刻をセット
+          const now = new Date();
+          now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+          datetimeInput.value = now.toISOString().slice(0, 16);
+        }
+      });
+    });
+
+    // Google Maps経路URLを生成（日時対応）
     function buildMapsUrl() {
       const origin = originInput.value.trim();
       const destination = destInput.value.trim();
       const travelMode = document.querySelector('input[name="travelMode"]:checked').value;
+      const timeType = document.querySelector('input[name="timeType"]:checked').value;
       if (!origin || !destination) return null;
+
+      // 日時指定がある場合は旧形式URLを使用（日時パラメータ対応）
+      if (timeType !== "now" && datetimeInput.value) {
+        const dt = new Date(datetimeInput.value);
+        const dirflg = { transit: "r", driving: "d", walking: "w", bicycling: "b" }[travelMode] || "r";
+        const mm = String(dt.getMonth() + 1).padStart(2, "0");
+        const dd = String(dt.getDate()).padStart(2, "0");
+        const yyyy = dt.getFullYear();
+        const hours = dt.getHours();
+        const minutes = String(dt.getMinutes()).padStart(2, "0");
+        const ampm = hours >= 12 ? "pm" : "am";
+        const h12 = hours % 12 || 12;
+        const ttype = timeType === "arrive" ? "arr" : "dep";
+
+        return (
+          `https://www.google.com/maps?` +
+          `saddr=${encodeURIComponent(origin)}` +
+          `&daddr=${encodeURIComponent(destination)}` +
+          `&dirflg=${dirflg}` +
+          `&ttype=${ttype}` +
+          `&date=${mm}/${dd}/${yyyy}` +
+          `&time=${h12}:${minutes}${ampm}`
+        );
+      }
+
+      // 日時指定なしの場合は通常のURL
       return (
         `https://www.google.com/maps/dir/?api=1` +
         `&origin=${encodeURIComponent(origin)}` +
         `&destination=${encodeURIComponent(destination)}` +
         `&travelmode=${travelMode}`
       );
+    }
+
+    // 表示用テキスト
+    function buildLabel() {
+      const timeType = document.querySelector('input[name="timeType"]:checked').value;
+      let label = `${originInput.value.trim()} → ${destInput.value.trim()}`;
+      if (timeType !== "now" && datetimeInput.value) {
+        const dt = new Date(datetimeInput.value);
+        const prefix = timeType === "arrive" ? "到着" : "出発";
+        label += `\n${prefix}: ${dt.toLocaleString("ja-JP")}`;
+      }
+      return label;
     }
 
     generateBtn.addEventListener("click", () => {
@@ -120,7 +186,7 @@
       });
 
       mapsLink.href = url;
-      mapsLink.textContent = `${originInput.value.trim()} → ${destInput.value.trim()}`;
+      mapsLink.textContent = buildLabel();
       qrArea.hidden = false;
     });
 
